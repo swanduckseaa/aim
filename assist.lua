@@ -13,9 +13,15 @@ local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"
 ScreenGui.Name = "AimbotGui"
 ScreenGui.ResetOnSpawn = false
 
-local ToggleButton = Instance.new("TextButton", ScreenGui)
+local ControlPanel = Instance.new("Frame", ScreenGui)
+ControlPanel.Name = "ControlPanel"
+ControlPanel.Size = UDim2.new(0, 240, 0, 190)
+ControlPanel.Position = UDim2.new(0, 10, 0, 10)
+ControlPanel.BackgroundTransparency = 1
+
+local ToggleButton = Instance.new("TextButton", ControlPanel)
 ToggleButton.Size = UDim2.new(0, 120, 0, 40)
-ToggleButton.Position = UDim2.new(0, 10, 0, 10)
+ToggleButton.Position = UDim2.new(0, 0, 0, 0)
 ToggleButton.Text = "Aimbot: OFF"
 ToggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 ToggleButton.TextColor3 = Color3.new(1,1,1)
@@ -23,18 +29,18 @@ ToggleButton.Font = Enum.Font.SourceSansBold
 ToggleButton.TextSize = 20
 ToggleButton.AutoButtonColor = true
 
-local FOVSliderLabel = Instance.new("TextLabel", ScreenGui)
+local FOVSliderLabel = Instance.new("TextLabel", ControlPanel)
 FOVSliderLabel.Size = UDim2.new(0, 200, 0, 20)
-FOVSliderLabel.Position = UDim2.new(0, 10, 0, 60)
+FOVSliderLabel.Position = UDim2.new(0, 0, 0, 50)
 FOVSliderLabel.Text = "FOV: 100"
 FOVSliderLabel.BackgroundTransparency = 1
 FOVSliderLabel.TextColor3 = Color3.new(1,1,1)
 FOVSliderLabel.Font = Enum.Font.SourceSans
 FOVSliderLabel.TextSize = 18
 
-local FOVSlider = Instance.new("Frame", ScreenGui)
+local FOVSlider = Instance.new("Frame", ControlPanel)
 FOVSlider.Size = UDim2.new(0, 200, 0, 20)
-FOVSlider.Position = UDim2.new(0, 10, 0, 80)
+FOVSlider.Position = UDim2.new(0, 0, 0, 75)
 FOVSlider.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 FOVSlider.BorderSizePixel = 0
 
@@ -50,9 +56,9 @@ FOVSliderButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 FOVSliderButton.Text = ""
 FOVSliderButton.AutoButtonColor = false
 
-local TargetDropdown = Instance.new("TextButton", ScreenGui)
+local TargetDropdown = Instance.new("TextButton", ControlPanel)
 TargetDropdown.Size = UDim2.new(0, 120, 0, 40)
-TargetDropdown.Position = UDim2.new(0, 10, 0, 110)
+TargetDropdown.Position = UDim2.new(0, 0, 0, 110)
 TargetDropdown.Text = "Target: Head"
 TargetDropdown.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 TargetDropdown.TextColor3 = Color3.new(1,1,1)
@@ -60,15 +66,27 @@ TargetDropdown.Font = Enum.Font.SourceSansBold
 TargetDropdown.TextSize = 20
 TargetDropdown.AutoButtonColor = true
 
-local DropdownFrame = Instance.new("Frame", ScreenGui)
+local DropdownFrame = Instance.new("Frame", ControlPanel)
 DropdownFrame.Size = UDim2.new(0, 120, 0, 90)
-DropdownFrame.Position = UDim2.new(0, 10, 0, 150)
+DropdownFrame.Position = UDim2.new(0, 0, 0, 150)
 DropdownFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 DropdownFrame.Visible = false
 DropdownFrame.BorderSizePixel = 0
 
+local GuiToggleButton = Instance.new("TextButton", ScreenGui)
+GuiToggleButton.Size = UDim2.new(0, 110, 0, 34)
+GuiToggleButton.Position = UDim2.new(1, -120, 0, 10)
+GuiToggleButton.Text = "Hide GUI"
+GuiToggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+GuiToggleButton.TextColor3 = Color3.new(1,1,1)
+GuiToggleButton.Font = Enum.Font.SourceSansBold
+GuiToggleButton.TextSize = 16
+GuiToggleButton.AutoButtonColor = true
+
 local targets = {"Head", "Torso", "Legs"}
 local targetButtons = {}
+local guiVisible = true
+local controlElements = {ToggleButton, FOVSliderLabel, FOVSlider, TargetDropdown, DropdownFrame}
 
 for i, v in ipairs(targets) do
     local btn = Instance.new("TextButton", DropdownFrame)
@@ -171,6 +189,16 @@ ToggleButton.MouseButton1Click:Connect(function()
     FOVCircle.Visible = aimbotEnabled
 end)
 
+GuiToggleButton.MouseButton1Click:Connect(function()
+    guiVisible = not guiVisible
+    for _, element in ipairs(controlElements) do
+        if element then
+            element.Visible = guiVisible
+        end
+    end
+    GuiToggleButton.Text = guiVisible and "Hide GUI" or "Show GUI"
+end)
+
 local dragging = false
 FOVSliderButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -217,9 +245,10 @@ RunService.RenderStepped:Connect(function()
             aimAt(targetPlayer.Character)
         end
     end
-    if FOVCircle.Visible then
-        local mousePos = UserInputService:GetMouseLocation()
-        FOVCircle.Position = Vector2.new(mousePos.X, mousePos.Y)
+
+    if aimbotEnabled then
+        local viewportSize = Camera.ViewportSize
+        FOVCircle.Position = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
         FOVCircle.Visible = true
     else
         FOVCircle.Visible = false
