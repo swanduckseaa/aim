@@ -1,5 +1,5 @@
 # aim
-
+# WORK IN PROGRESS!!! DOESNT WORK WELL. USE AT YOUR OWN RISK
 Load the assist script with:
 
 ```lua
